@@ -1,6 +1,7 @@
 using System;
 using Assets.Sources.Scripts.UI.Common;
 using Memoria.Data;
+using Random = UnityEngine.Random;
 
 namespace Memoria.Scripts.Battle {
     /// <summary>
@@ -23,6 +24,25 @@ namespace Memoria.Scripts.Battle {
                 return;
             }
 
+            bool masterTheif = _v.Caster.HasSupportAbility (SupportAbility1.MasterThief);
+            bool bandit = _v.Caster.HasSupportAbility (SupportAbility2.Bandit);
+
+            if (!masterTheif && !bandit) {
+                _v.Context.HitRate = (Int16) (_v.Caster.Level + _v.Caster.Will);
+                _v.Context.Evade = _v.Target.Level;
+
+                if (_v.Context.HitRate < _v.Context.Evade && Random.value > 0.5) {
+                    UiState.SetBattleFollowFormatMessage (BattleMesages.CouldNotStealAnything);
+                    return;
+                }
+            }
+
+            // If you don't have master theif 50% steal rate. 
+            if (!masterTheif && Random.value > 0.5) {
+                UiState.SetBattleFollowFormatMessage (BattleMesages.CouldNotStealAnything);
+                return;
+            }
+
             if (enemy.StealableItems[0] != Byte.MaxValue)
                 StealItem (enemy, 0);
             else if (enemy.StealableItems[1] != Byte.MaxValue)
@@ -31,41 +51,6 @@ namespace Memoria.Scripts.Battle {
                 StealItem (enemy, 2);
             else if (enemy.StealableItems[3] != Byte.MaxValue)
                 StealItem (enemy, 3);
-
-            // if (!_v.Caster.HasSupportAbility(SupportAbility2.Bandit))
-            // {
-            //     _v.Context.HitRate = (Int16)(_v.Caster.Level + _v.Caster.Will);
-            //     _v.Context.Evade = _v.Target.Level;
-
-            //     if (GameRandom.Next16() % _v.Context.HitRate < GameRandom.Next16() % _v.Context.Evade)
-            //     {
-            //         UiState.SetBattleFollowFormatMessage(BattleMesages.CouldNotStealAnything);
-            //         return;
-            //     }
-            // }
-
-            // if (_v.Caster.HasSupportAbility(SupportAbility1.MasterThief))
-            // {
-            //     if (enemy.StealableItems[3] != Byte.MaxValue && GameRandom.Next8() < 32)
-            //         StealItem(enemy, 3);
-            //     else if (enemy.StealableItems[2] != Byte.MaxValue && GameRandom.Next8() < 32)
-            //         StealItem(enemy, 2);
-            //     else if (enemy.StealableItems[1] != Byte.MaxValue && GameRandom.Next8() < 64)
-            //         StealItem(enemy, 1);
-            //     else
-            //         StealItem(enemy, 0);
-            // }
-            // else
-            // {
-            //     if (GameRandom.Next8() < 1)
-            //         StealItem(enemy, 3);
-            //     else if (GameRandom.Next8() < 16)
-            //         StealItem(enemy, 2);
-            //     else if (GameRandom.Next8() < 64)
-            //         StealItem(enemy, 1);
-            //     else
-            //         StealItem(enemy, 0);
-            // }
         }
 
         private static Boolean HasStealableItems (BattleEnemy enemy) {
